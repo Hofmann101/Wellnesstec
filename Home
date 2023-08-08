@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gym Occupancy Voting</title>
+<style>
+  button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <h2>Voting Section</h2>
+  <button id="btnGreen">0-35 students</button>
+  <button id="btnLightYellow">36-70 students</button>
+  <button id="btnYellow">71-105 students</button>
+  <button id="btnOrange">106-140 students</button>
+  <button id="btnRed">175+ students</button>
+
+  <h2>Current Status</h2>
+  <p>Last Checked: <span id="lastChecked"></span></p>
+  <p>Current Occupancy: <span id="currentStatus"></span></p>
+
+  <script>
+    const voteButtons = document.querySelectorAll('button[id^="btn"]');
+    const lastCheckedElement = document.getElementById('lastChecked');
+    const currentStatusElement = document.getElementById('currentStatus');
+    let votes = Array.from({ length: voteButtons.length }, () => 0);
+    let lastVoteTime = 0;
+
+    function updateVotes(buttonIndex) {
+      const currentTime = new Date().getTime();
+
+      if (currentTime - lastVoteTime >= 10 * 60 * 1000) {
+        votes = votes.map((vote, index) => (index === buttonIndex ? vote + 1 : vote));
+        lastVoteTime = currentTime;
+        updateCurrentStatus();
+      } else {
+        alert("You can only vote once every 10 minutes.");
+      }
+    }
+
+    function updateCurrentStatus() {
+      const maxVote = Math.max(...votes);
+      const maxVoteIndex = votes.indexOf(maxVote);
+
+      currentStatusElement.textContent = voteButtons[maxVoteIndex].textContent;
+      currentStatusElement.style.color = voteButtons[maxVoteIndex].style.backgroundColor;
+
+      const now = new Date();
+      lastCheckedElement.textContent = now.toLocaleTimeString();
+    }
+
+    voteButtons.forEach((button, index) => {
+      button.addEventListener('click', () => updateVotes(index));
+    });
+
+    setInterval(updateCurrentStatus, 10 * 60 * 1000); // Update every 10 minutes
+  </script>
+</body>
+</html>
